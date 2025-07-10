@@ -150,16 +150,22 @@ Use predefined tokens for quick setup:
 - Read-write: Set `READ_WRITE_TOKEN` environment variable
 
 ### Custom HMAC Tokens
-For enhanced security, generate custom tokens using HMAC-SHA256:
+For enhanced security, generate custom tokens using Bun's crypto API:
 
 ```typescript
-import { createHmac } from 'crypto';
-
+// Using Bun's built-in CryptoHasher
 const secretKey = 'your-secret-key';
 const tokenData = { permissions: 'readwrite', userId: 'user123' };
 const tokenPart = Buffer.from(JSON.stringify(tokenData)).toString('base64url');
-const signature = createHmac('sha256', secretKey).update(tokenPart).digest().toString('base64url');
+
+const hasher = new Bun.CryptoHasher('sha256', secretKey);
+hasher.update(tokenPart);
+const signature = Buffer.from(hasher.digest()).toString('base64url');
 const token = `${tokenPart}.${signature}`;
+
+// Or use the built-in helper function:
+import { generateCustomToken } from './src/lib/auth';
+const token = generateCustomToken('readwrite', 'user123');
 ```
 
 ## API Reference

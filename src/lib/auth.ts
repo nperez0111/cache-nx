@@ -1,4 +1,3 @@
-import { createHmac } from "node:crypto";
 import { config } from "./config";
 
 export type TokenType = "readonly" | "readwrite" | "invalid";
@@ -18,18 +17,17 @@ export function verifyToken(token: string): TokenType {
     return "readwrite";
   }
   
-  // For custom tokens, verify using HMAC
+  // For custom tokens, verify using HMAC with Bun's crypto API
   try {
     const [tokenPart, signature] = cleanToken.split(".");
     if (!tokenPart || !signature) {
       return "invalid";
     }
     
-    const expectedSignature = Buffer.from(
-      createHmac("sha256", config.auth.secretKey)
-        .update(tokenPart)
-        .digest()
-    ).toString("base64url");
+    // Use Bun's CryptoHasher for HMAC
+    const hasher = new Bun.CryptoHasher("sha256", config.auth.secretKey);
+    hasher.update(tokenPart);
+    const expectedSignature = Buffer.from(hasher.digest()).toString("base64url");
     
     if (signature === expectedSignature) {
       // Parse token to determine permissions
@@ -49,4 +47,21 @@ export function hasWritePermission(tokenType: TokenType): boolean {
 
 export function hasReadPermission(tokenType: TokenType): boolean {
   return tokenType === "readonly" || tokenType === "readwrite";
+}
+
+export function generateCustomToken(permissions: "readonly" | "readwrite", userId?: string): string {
+  const tokenData = {
+    permissions,
+    userId: userId || "anonymous",
+    createdAt: new Date().toISOString(),
+  };
+  
+  const tokenPart = Buffer.from(JSON.stringify(tokenData)).toString("base64url");
+  
+  // Use Bun's CryptoHasher for HMAC
+  const hasher = new Bun.CryptoHasher("sha256", config.auth.secretKey);
+  hasher.update(tokenPart);
+  const signature = Buffer.from(hasher.digest()).toString("base64url");
+  
+  return `${tokenPart}.${signature}`;
 }

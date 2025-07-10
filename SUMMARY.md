@@ -8,7 +8,7 @@ I've successfully created a complete self-hosted Nx cache server implementation 
 - **Full Nx API Compatibility**: Implements the complete OpenAPI specification for Nx remote caching
 - **High Performance**: Built with Bun and Elysia for maximum speed
 - **Redis Backend**: Uses Redis for fast, persistent cache storage with configurable TTL
-- **Secure Authentication**: Multiple authentication methods including simple tokens and HMAC-signed tokens
+- **Secure Authentication**: Multiple authentication methods including simple tokens and HMAC-signed tokens using Bun's native crypto API
 - **Web Management Interface**: Beautiful dashboard for viewing and managing cache items
 - **Docker Ready**: Complete containerization with Docker and Docker Compose support
 

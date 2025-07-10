@@ -11,6 +11,7 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "test:api": "bun run scripts/test-api.ts",
+    "generate-token": "bun run scripts/generate-token.ts",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f nx-cache-server"
