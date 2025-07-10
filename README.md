@@ -166,31 +166,30 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://valkey:6379
       - AUTH_SECRET_KEY=${AUTH_SECRET_KEY}
       - READ_ONLY_TOKEN=${READ_ONLY_TOKEN}
       - READ_WRITE_TOKEN=${READ_WRITE_TOKEN}
       - CACHE_TTL=604800
       - MAX_CACHE_SIZE=104857600
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
     restart: unless-stopped
 
-  redis:
-    image: redis:7.2.3-alpine
-    command: redis-server --maxmemory 2gb --maxmemory-policy allkeys-lru
+  valkey:
+    image: valkey/valkey:latest
     volumes:
-      - redis_data:/data
+      - valkey_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
     restart: unless-stopped
 
 volumes:
-  redis_data:
+  valkey_data:
 ```
 
 ## Monitoring

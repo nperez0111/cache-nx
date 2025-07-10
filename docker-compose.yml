@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   nx-cache-server:
@@ -7,28 +7,27 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://valkey:6379
       - AUTH_SECRET_KEY=your-secret-key-change-this
       - READ_ONLY_TOKEN=readonly-token
       - READ_WRITE_TOKEN=readwrite-token
-      - CACHE_TTL=604800  # 7 days in seconds
-      - MAX_CACHE_SIZE=104857600  # 100MB in bytes
+      - CACHE_TTL=604800 # 7 days in seconds
+      - MAX_CACHE_SIZE=104857600 # 100MB in bytes
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - nx-cache
 
-  redis:
-    image: redis:7.2.3-alpine
-    command: redis-server --maxmemory 1gb --maxmemory-policy allkeys-lru
+  valkey:
+    image: valkey/valkey:latest
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - valkey_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -38,7 +37,7 @@ services:
       - nx-cache
 
 volumes:
-  redis_data:
+  valkey_data:
 
 networks:
   nx-cache:
