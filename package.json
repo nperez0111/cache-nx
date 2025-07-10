@@ -7,6 +7,7 @@
   "main": "src/server.ts",
   "scripts": {
     "dev": "bun --hot src/server.ts",
+    "dev:web": "bun --hot src/server.ts --open /web",
     "start": "NODE_ENV=production bun src/server.ts",
     "build": "bun run build.ts",
     "test": "bun test",

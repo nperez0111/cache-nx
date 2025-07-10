@@ -20,16 +20,20 @@ nx-cache-server/
 │   ├── lib/
 │   │   ├── config.ts          # Configuration management
 │   │   ├── redis.ts           # Redis connection setup
-│   │   └── auth.ts            # Authentication logic
+│   │   └── auth.ts            # Authentication logic (using Bun crypto)
 │   ├── routes/
 │   │   ├── cache.ts           # Nx cache API routes (/v1/cache/{hash})
-│   │   └── web.ts             # Web interface routes (/web)
+│   │   └── web.ts             # Web interface API routes (/web/api)
+│   ├── web/
+│   │   ├── index.html         # Web interface HTML (imported by Bun)
+│   │   └── app.ts             # Frontend TypeScript application
 │   └── types/
 │       └── index.ts           # TypeScript type definitions
 ├── tests/
 │   └── api.test.ts            # Basic API tests
 ├── scripts/
-│   └── test-api.ts            # Manual API testing script
+│   ├── test-api.ts            # Manual API testing script
+│   └── generate-token.ts      # Token generation using Bun crypto
 ├── Dockerfile                 # Container definition
 ├── docker-compose.yml         # Multi-service orchestration
 ├── .env.example              # Environment variables template
@@ -62,7 +66,7 @@ The server supports multiple authentication methods:
    - Read-write: `readwrite`
 
 2. **HMAC-signed Tokens** (for production):
-   - Custom tokens signed with HMAC-SHA256
+   - Custom tokens signed with HMAC-SHA256 using Bun's CryptoHasher
    - Configurable permissions and metadata
 
 ### 🎯 Nx Integration
@@ -109,13 +113,14 @@ Add this to your `nx.json`:
 
 ### 🌐 Web Interface
 
-The web interface provides:
-- Real-time cache statistics
-- Cache item browser with metadata
-- Individual cache deletion
-- Bulk cache purging
-- Auto-refresh every 30 seconds
-- Responsive design with Tailwind CSS
+The web interface is now a separate frontend application using Bun's full-stack capabilities:
+- **Modern Architecture**: HTML and TypeScript files imported natively by Bun
+- **Real-time Statistics**: Live cache metrics with status indicators
+- **Enhanced UX**: Toast notifications, loading states, and error handling
+- **Advanced Features**: Hash copying, sorting, search, and keyboard shortcuts
+- **Auto-refresh**: Updates every 30 seconds with manual refresh option
+- **Responsive Design**: Beautiful UI with Tailwind CSS
+- **Type Safety**: Full TypeScript support for the frontend
 
 ### ⚙️ Configuration
 
