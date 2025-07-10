@@ -37,14 +37,18 @@ async function testCacheUpload() {
     const response = await fetch(`${BASE_URL}/v1/cache/test-hash-123`, {
       method: "PUT",
       headers: {
-        "Authorization": `Bearer ${WRITE_TOKEN}`,
+        Authorization: `Bearer ${WRITE_TOKEN}`,
         "Content-Type": "application/octet-stream",
         "Content-Length": testData.length.toString(),
       },
       body: testData,
     });
-    
-    console.log("✅ Cache upload response:", response.status, await response.text());
+
+    console.log(
+      "✅ Cache upload response:",
+      response.status,
+      await response.text()
+    );
   } catch (error) {
     console.error("❌ Cache upload failed:", error);
   }
@@ -55,15 +59,18 @@ async function testCacheDownload() {
   try {
     const response = await fetch(`${BASE_URL}/v1/cache/test-hash-123`, {
       headers: {
-        "Authorization": `Bearer ${READ_TOKEN}`,
+        Authorization: `Bearer ${READ_TOKEN}`,
       },
     });
-    
+
     if (response.ok) {
       const data = await response.text();
       console.log("✅ Cache download successful:", data);
     } else {
-      console.log("📭 Cache not found (expected if not uploaded):", response.status);
+      console.log(
+        "📭 Cache not found (expected if not uploaded):",
+        response.status
+      );
     }
   } catch (error) {
     console.error("❌ Cache download failed:", error);
@@ -73,7 +80,7 @@ async function testCacheDownload() {
 async function testWebInterface() {
   console.log("🌐 Testing web interface...");
   try {
-    const response = await fetch(`${BASE_URL}/web`);
+    const response = await fetch(`${BASE_URL}/`);
     if (response.ok) {
       console.log("✅ Web interface accessible");
     } else {
@@ -86,13 +93,13 @@ async function testWebInterface() {
 
 async function runTests() {
   console.log(`🚀 Testing Nx Cache Server at ${BASE_URL}\n`);
-  
+
   await testHealth();
   await testAuthenticationFailure();
   await testCacheUpload();
   await testCacheDownload();
   await testWebInterface();
-  
+
   console.log("\n🎉 Test suite completed!");
 }
 

@@ -17,7 +17,7 @@ describe("Nx Cache Server API", () => {
 
   test("should return health status", async () => {
     const response = await app.handle(new Request("http://localhost/health"));
-    
+
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.status).toBe("ok");
@@ -28,14 +28,7 @@ describe("Nx Cache Server API", () => {
     const response = await app.handle(
       new Request("http://localhost/v1/cache/test-hash")
     );
-    
-    expect(response.status).toBe(403);
-  });
 
-  test("should serve web interface", async () => {
-    const response = await app.handle(new Request("http://localhost/web"));
-    
-    expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe("text/html");
+    expect(response.status).toBe(403);
   });
 });

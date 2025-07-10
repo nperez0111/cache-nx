@@ -4,11 +4,11 @@ import { config } from "./config";
 export async function setupRedis() {
   try {
     const client = new Redis(config.redis.url);
-    
+
     // Test connection
     await client.ping();
     console.log("✅ Redis connection established");
-    
+
     return client;
   } catch (error) {
     console.error("❌ Failed to connect to Redis:", error);

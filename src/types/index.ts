@@ -19,3 +19,6 @@ export interface CacheListItem {
   createdAt: string;
   lastAccessed: string;
 }
+
+// Alias for React app compatibility
+export type CacheItem = CacheListItem;
