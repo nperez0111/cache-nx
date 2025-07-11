@@ -1,3 +1,4 @@
+import React from "react";
 import type { CacheItem } from "../../types";
 
 interface CacheTableProps {
@@ -7,6 +8,7 @@ interface CacheTableProps {
   onSortChange: (sortBy: "newest" | "oldest" | "largest" | "smallest") => void;
   onDeleteCache: (hash: string) => void;
   onCopyHash?: (hash: string) => void;
+  theme: "light" | "dark";
 }
 
 export function CacheTable({
@@ -16,6 +18,7 @@ export function CacheTable({
   onSortChange,
   onDeleteCache,
   onCopyHash,
+  theme,
 }: CacheTableProps) {
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
@@ -41,32 +44,81 @@ export function CacheTable({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold">Cache Items</h2>
+      <div
+        className={`rounded-lg shadow transition-colors ${
+          theme === "dark" ? "bg-gray-800 border border-gray-700" : "bg-white"
+        }`}
+      >
+        <div
+          className={`p-6 border-b transition-colors ${
+            theme === "dark" ? "border-gray-700" : "border-gray-200"
+          }`}
+        >
+          <h2
+            className={`text-xl font-semibold ${
+              theme === "dark" ? "text-gray-200" : "text-gray-900"
+            }`}
+          >
+            Cache Items
+          </h2>
         </div>
-        <div className="p-8 text-center text-gray-500">
-          <div className="loading">Loading cache items...</div>
+        <div className="p-8 text-center">
+          <div
+            className={`loading ${
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            Loading cache items...
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Cache Items</h2>
+    <div
+      className={`rounded-lg shadow transition-colors ${
+        theme === "dark" ? "bg-gray-800 border border-gray-700" : "bg-white"
+      }`}
+    >
+      <div
+        className={`p-6 border-b transition-colors flex justify-between items-center ${
+          theme === "dark" ? "border-gray-700" : "border-gray-200"
+        }`}
+      >
+        <h2
+          className={`text-xl font-semibold ${
+            theme === "dark" ? "text-gray-200" : "text-gray-900"
+          }`}
+        >
+          Cache Items
+        </h2>
         <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-500">{caches.length} items</span>
+          <span
+            className={`text-sm ${
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            {caches.length} items
+          </span>
           <div className="flex items-center space-x-2">
-            <label htmlFor="sort-select" className="text-sm text-gray-700">
+            <label
+              htmlFor="sort-select"
+              className={`text-sm ${
+                theme === "dark" ? "text-gray-300" : "text-gray-700"
+              }`}
+            >
               Sort by:
             </label>
             <select
               id="sort-select"
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value as typeof sortBy)}
-              className="text-sm border border-gray-300 rounded px-2 py-1"
+              className={`text-sm border rounded px-2 py-1 transition-colors ${
+                theme === "dark"
+                  ? "bg-gray-700 border-gray-600 text-gray-200"
+                  : "border-gray-300 bg-white text-gray-900"
+              }`}
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -77,45 +129,91 @@ export function CacheTable({
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y transition-colors">
+          <thead
+            className={`transition-colors ${
+              theme === "dark" ? "bg-gray-700" : "bg-gray-50"
+            }`}
+          >
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-500"
+                }`}
+              >
                 Hash
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-500"
+                }`}
+              >
                 Size
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-500"
+                }`}
+              >
                 Created
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-500"
+                }`}
+              >
                 Last Accessed
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-500"
+                }`}
+              >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody
+            className={`divide-y transition-colors ${
+              theme === "dark" ? "divide-gray-700" : "divide-gray-200"
+            }`}
+          >
             {caches.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                <td
+                  colSpan={5}
+                  className={`px-6 py-8 text-center ${
+                    theme === "dark" ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
                   No cache items found. Start using Nx with this cache server to
                   see items here.
                 </td>
               </tr>
             ) : (
               caches.map((cache) => (
-                <tr key={cache.hash}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                <tr
+                  key={cache.hash}
+                  className={`transition-colors ${
+                    theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-50"
+                  }`}
+                >
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm font-mono ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     <div className="flex items-center">
                       <span title={cache.hash}>
                         {cache.hash.substring(0, 16)}...
                       </span>
                       <button
                         onClick={() => copyToClipboard(cache.hash)}
-                        className="ml-2 text-gray-400 hover:text-gray-600"
+                        className={`ml-2 transition-colors ${
+                          theme === "dark"
+                            ? "text-gray-500 hover:text-gray-300"
+                            : "text-gray-400 hover:text-gray-600"
+                        }`}
                         title="Copy full hash"
                       >
                         <svg
@@ -129,16 +227,32 @@ export function CacheTable({
                       </button>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     {formatBytes(cache.size)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     {formatDate(cache.createdAt)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     {formatDate(cache.lastAccessed)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap text-sm ${
+                      theme === "dark" ? "text-gray-200" : "text-gray-900"
+                    }`}
+                  >
                     <button
                       onClick={() => onDeleteCache(cache.hash)}
                       className="text-red-600 hover:text-red-900 transition-colors"

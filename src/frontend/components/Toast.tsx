@@ -1,10 +1,13 @@
+import React from "react";
+
 interface ToastProps {
   message: string;
   type: "success" | "error" | "info";
   onClose: () => void;
+  theme: "light" | "dark";
 }
 
-export function Toast({ message, type, onClose }: ToastProps) {
+export function Toast({ message, type, onClose, theme }: ToastProps) {
   const getIcon = () => {
     switch (type) {
       case "success":
@@ -54,16 +57,32 @@ export function Toast({ message, type, onClose }: ToastProps) {
 
   return (
     <div className="fixed top-4 right-4 z-50">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm">
+      <div
+        className={`border rounded-lg shadow-lg p-4 max-w-sm transition-colors ${
+          theme === "dark"
+            ? "bg-gray-800 border-gray-600"
+            : "bg-white border-gray-200"
+        }`}
+      >
         <div className="flex items-center">
           <div className="flex-shrink-0">{getIcon()}</div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900">{message}</p>
+            <p
+              className={`text-sm font-medium ${
+                theme === "dark" ? "text-gray-200" : "text-gray-900"
+              }`}
+            >
+              {message}
+            </p>
           </div>
           <button onClick={onClose} className="ml-auto flex-shrink-0">
             <span className="sr-only">Close</span>
             <svg
-              className="w-4 h-4 text-gray-400"
+              className={`w-4 h-4 ${
+                theme === "dark"
+                  ? "text-gray-400 hover:text-gray-300"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
               fill="currentColor"
               viewBox="0 0 20 20"
             >

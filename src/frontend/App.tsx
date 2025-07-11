@@ -4,12 +4,14 @@ import { StatsCard } from "./components/StatsCard";
 import { CacheTable } from "./components/CacheTable";
 import { Toast } from "./components/Toast";
 import { StatusIndicator } from "./components/StatusIndicator";
+import { ThemeToggle } from "./components/ThemeToggle";
 import {
   useStats,
   useCaches,
   useDeleteCache,
   usePurgeAllCaches,
 } from "./hooks/useCacheQueries";
+import { useTheme } from "./hooks/useTheme";
 import "./App.css";
 
 // Create a client
@@ -30,6 +32,7 @@ function AppContent() {
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "largest" | "smallest"
   >("newest");
+  const { theme, toggleTheme } = useTheme();
 
   // TanStack Query hooks
   const statsQuery = useStats();
@@ -123,6 +126,10 @@ function AppContent() {
         e.preventDefault();
         handleRefresh();
       }
+      if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        toggleTheme();
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -130,25 +137,44 @@ function AppContent() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleRefresh]);
+  }, [handleRefresh, toggleTheme]);
 
   const status = getConnectionStatus();
   const isLoading = cachesQuery.isLoading;
   const stats = statsQuery.data;
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div
+      className={`min-h-screen transition-colors duration-200 ${
+        theme === "dark"
+          ? "bg-gray-900 text-gray-100"
+          : "bg-gray-100 text-gray-900"
+      }`}
+    >
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Nx Cache Server
-          </h1>
-          <p className="text-gray-600">Manage your Nx build cache</p>
-          <div className="mt-4 flex items-center space-x-4">
-            <StatusIndicator status={status} />
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Nx Cache Server</h1>
+              <p
+                className={`${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Manage your Nx build cache
+              </p>
+            </div>
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          </div>
+          <div className="flex items-center space-x-4">
+            <StatusIndicator status={status} theme={theme} />
             <button
               onClick={handleRefresh}
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              className={`text-sm underline transition-colors ${
+                theme === "dark"
+                  ? "text-blue-400 hover:text-blue-300"
+                  : "text-blue-600 hover:text-blue-800"
+              }`}
               disabled={isLoading}
             >
               Refresh
@@ -162,14 +188,22 @@ function AppContent() {
             value={stats?.totalItems ?? "-"}
             color="blue"
             loading={status === "loading"}
+            theme={theme}
           />
           <StatsCard
             title="Total Size"
             value={stats?.totalSize ? formatBytes(stats.totalSize) : "-"}
             color="green"
             loading={status === "loading"}
+            theme={theme}
           />
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div
+            className={`p-6 rounded-lg shadow transition-colors ${
+              theme === "dark"
+                ? "bg-gray-800 border border-gray-700"
+                : "bg-white"
+            }`}
+          >
             <h3 className="text-lg font-semibold mb-2">Actions</h3>
             <button
               onClick={handlePurgeAll}
@@ -190,6 +224,7 @@ function AppContent() {
           onCopyHash={(hash) =>
             showToast("Hash copied to clipboard", "success")
           }
+          theme={theme}
         />
       </div>
 
@@ -198,6 +233,7 @@ function AppContent() {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
+          theme={theme}
         />
       )}
     </div>

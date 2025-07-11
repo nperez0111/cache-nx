@@ -1,8 +1,11 @@
+import React from "react";
+
 interface StatusIndicatorProps {
   status: "online" | "offline" | "loading";
+  theme: "light" | "dark";
 }
 
-export function StatusIndicator({ status }: StatusIndicatorProps) {
+export function StatusIndicator({ status, theme }: StatusIndicatorProps) {
   const getStatusConfig = () => {
     switch (status) {
       case "online":
@@ -28,7 +31,13 @@ export function StatusIndicator({ status }: StatusIndicatorProps) {
   return (
     <div className="flex items-center">
       <div className={config.className}></div>
-      <span className="text-sm text-gray-600">{config.text}</span>
+      <span
+        className={`text-sm ${
+          theme === "dark" ? "text-gray-400" : "text-gray-600"
+        }`}
+      >
+        {config.text}
+      </span>
     </div>
   );
 }
