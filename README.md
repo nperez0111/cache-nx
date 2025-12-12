@@ -69,7 +69,8 @@ Configure the server using environment variables:
 | `READ_ONLY_TOKEN` | `readonly` | Token for read-only access |
 | `READ_WRITE_TOKEN` | `readwrite` | Token for read-write access |
 | `CACHE_TTL` | `604800` | Cache TTL in seconds (7 days) |
-| `MAX_CACHE_SIZE` | `104857600` | Maximum cache item size in bytes (100MB) |
+| `MAX_ITEM_SIZE` | `104857600` | Maximum cache item size in bytes (100MB) |
+| `MAX_TOTAL_CACHE_SIZE` | `10737418240` | Maximum total cache size in bytes (10GB). When exceeded, least recently used entries are evicted. |
 
 ## Using with Nx
 
@@ -171,7 +172,8 @@ services:
       - READ_ONLY_TOKEN=${READ_ONLY_TOKEN}
       - READ_WRITE_TOKEN=${READ_WRITE_TOKEN}
       - CACHE_TTL=604800
-      - MAX_CACHE_SIZE=104857600
+      - MAX_ITEM_SIZE=104857600
+      - MAX_TOTAL_CACHE_SIZE=10737418240
     depends_on:
       valkey:
         condition: service_healthy

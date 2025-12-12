@@ -1,5 +1,10 @@
 import { Elysia } from "elysia";
-import { getCacheKey, getMetadataKey } from "../lib/redis";
+import {
+  getCacheKey,
+  getMetadataKey,
+  updateTotalCacheSize,
+  resetTotalCacheSize,
+} from "../lib/redis";
 import type { CacheListItem, CacheStats } from "../types";
 
 const webApp = new Elysia({ prefix: "/web" })
@@ -84,8 +89,17 @@ const webApp = new Elysia({ prefix: "/web" })
       const cacheKey = getCacheKey(hash);
       const metadataKey = getMetadataKey(hash);
 
+      // Get the item size before deleting
+      const metadata = await redis.hgetall(metadataKey);
+      const itemSize = metadata && metadata.size ? parseInt(metadata.size, 10) : 0;
+
       await redis.del(cacheKey);
       await redis.del(metadataKey);
+
+      // Update total cache size
+      if (itemSize > 0) {
+        await updateTotalCacheSize(redis, -itemSize);
+      }
 
       return { success: true, message: "Cache deleted successfully" };
     } catch (error) {
@@ -105,6 +119,9 @@ const webApp = new Elysia({ prefix: "/web" })
       if (metadataKeys.length > 0) {
         await redis.del(...metadataKeys);
       }
+
+      // Reset total cache size
+      await resetTotalCacheSize(redis);
 
       return {
         success: true,

@@ -6,7 +6,12 @@ import {
   verifyToken,
 } from "../lib/auth";
 import { config } from "../lib/config";
-import { getCacheKey, getMetadataKey } from "../lib/redis";
+import {
+  getCacheKey,
+  getMetadataKey,
+  evictCacheEntries,
+  updateTotalCacheSize,
+} from "../lib/redis";
 import type { CacheMetadata } from "../types";
 
 const cacheApp = new Elysia({ prefix: "/v1" })
@@ -91,8 +96,8 @@ const cacheApp = new Elysia({ prefix: "/v1" })
           return "Content-Length header is required";
         }
 
-        // Check max size limit
-        if (contentLength > config.cache.maxSize) {
+        // Check max item size limit
+        if (contentLength > config.cache.maxItemSize) {
           set.status = 413;
           return "Cache item too large";
         }
@@ -114,8 +119,20 @@ const cacheApp = new Elysia({ prefix: "/v1" })
           return "Content-Length does not match actual content size";
         }
 
+        // Check total cache size and evict if necessary
+        if (config.cache.maxTotalSize > 0) {
+          await evictCacheEntries(
+            redis,
+            config.cache.maxTotalSize,
+            data.length
+          );
+        }
+
         // Store cache data with TTL
         await redis.setex(cacheKey, config.redis.ttl, data);
+
+        // Update total cache size
+        await updateTotalCacheSize(redis, data.length);
 
         // Store metadata
         const metadata: CacheMetadata = {

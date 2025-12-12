@@ -12,7 +12,8 @@ services:
       - READ_ONLY_TOKEN=readonly-token
       - READ_WRITE_TOKEN=readwrite-token
       - CACHE_TTL=604800 # 7 days in seconds
-      - MAX_CACHE_SIZE=104857600 # 100MB in bytes
+      - MAX_ITEM_SIZE=104857600 # 100MB per item in bytes
+      - MAX_TOTAL_CACHE_SIZE=10737418240 # 10GB total cache size in bytes
     depends_on:
       valkey:
         condition: service_healthy

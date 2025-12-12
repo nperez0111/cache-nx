@@ -10,6 +10,7 @@ export const config = {
     ttl: Number(process.env.CACHE_TTL) || 7 * 24 * 60 * 60, // 7 days in seconds
   },
   cache: {
-    maxSize: Number(process.env.MAX_CACHE_SIZE) || 100 * 1024 * 1024, // 100MB
+    maxItemSize: Number(process.env.MAX_ITEM_SIZE) || 100 * 1024 * 1024, // 100MB per item
+    maxTotalSize: Number(process.env.MAX_TOTAL_CACHE_SIZE) || 10 * 1024 * 1024 * 1024, // 10GB total
   },
 } as const;
