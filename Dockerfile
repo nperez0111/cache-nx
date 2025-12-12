@@ -1,6 +1,6 @@
-FROM oven/bun:1.3-slim
+FROM oven/bun:1.3-alpine
 
-RUN apt-get update && apt-get install -y curl --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
 WORKDIR /app
 
@@ -14,8 +14,8 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Create a non-root user
-RUN groupadd --system --gid 1001 bunuser && \
-    useradd --system --uid 1001 --gid 1001 bunuser
+RUN addgroup -S -g 1001 bunuser && \
+    adduser -S -u 1001 -G bunuser bunuser
 
 # Change ownership of the app directory
 RUN chown -R bunuser:bunuser /app
