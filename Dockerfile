@@ -14,8 +14,8 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Create a non-root user
-RUN addgroup --system --gid 1001 bunuser && \
-    adduser --system --uid 1001 bunuser
+RUN groupadd --system --gid 1001 bunuser && \
+    useradd --system --uid 1001 --gid 1001 bunuser
 
 # Change ownership of the app directory
 RUN chown -R bunuser:bunuser /app
