@@ -96,10 +96,10 @@ const cacheApp = new Elysia({ prefix: "/v1" })
           return "Content-Length header is required";
         }
 
-        // Check max item size limit
+        // Skip caching oversized items
         if (contentLength > config.cache.maxItemSize) {
-          set.status = 413;
-          return "Cache item too large";
+          set.status = 200;
+          return "Cache item too large, skipping";
         }
 
         let data: Buffer;
