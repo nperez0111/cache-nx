@@ -12,7 +12,7 @@ import {
   evictCacheEntries,
   updateTotalCacheSize,
 } from "../lib/redis";
-import type { CacheMetadata } from "../types";
+import type { CacheMetadata } from "../types"; // used in PUT
 
 const cacheApp = new Elysia({ prefix: "/v1" })
   .decorate("redis", {} as Redis) // Will be injected by parent app
@@ -40,16 +40,8 @@ const cacheApp = new Elysia({ prefix: "/v1" })
         return "Cache not found";
       }
 
-      // Update last accessed time
-      const metadata: CacheMetadata = {
-        hash,
-        size: data.length,
-        createdAt: new Date().toISOString(),
-        lastAccessed: new Date().toISOString(),
-        contentType: "application/octet-stream",
-      };
-
-      await redis.hset(metadataKey, metadata);
+      // Update last accessed time (only the lastAccessed field, preserving createdAt)
+      await redis.hset(metadataKey, "lastAccessed", new Date().toISOString());
 
       set.headers["Content-Type"] = "application/octet-stream";
       set.headers["Content-Length"] = data.length.toString();

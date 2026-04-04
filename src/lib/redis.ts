@@ -29,6 +29,21 @@ export function getTotalSizeKey(): string {
 }
 
 /**
+ * Scan for keys matching a pattern using non-blocking SCAN instead of KEYS
+ */
+async function scanKeys(redis: Redis, pattern: string): Promise<string[]> {
+  const keys: string[] = [];
+  const stream = redis.scanStream({ match: pattern, count: 200 });
+  return new Promise((resolve, reject) => {
+    stream.on("data", (batch: string[]) => {
+      keys.push(...batch);
+    });
+    stream.on("end", () => resolve(keys));
+    stream.on("error", reject);
+  });
+}
+
+/**
  * Get the current total cache size from Redis
  */
 export async function getTotalCacheSize(redis: Redis): Promise<number> {
@@ -65,17 +80,26 @@ export async function resetTotalCacheSize(redis: Redis): Promise<void> {
 export async function getAllCacheItemsSortedByAccess(
   redis: Redis
 ): Promise<Array<{ hash: string; size: number; lastAccessed: string }>> {
-  const metadataKeys = await redis.keys("nx:meta:*");
-  const items: Array<{ hash: string; size: number; lastAccessed: string }> = [];
+  const metadataKeys = await scanKeys(redis, "nx:meta:*");
+  if (metadataKeys.length === 0) return [];
 
+  const pipeline = redis.pipeline();
   for (const metaKey of metadataKeys) {
-    const metadata = await redis.hgetall(metaKey);
-    if (metadata && metadata.hash) {
-      items.push({
-        hash: metadata.hash,
-        size: parseInt(metadata.size || "0", 10),
-        lastAccessed: metadata.lastAccessed || metadata.createdAt || new Date(0).toISOString(),
-      });
+    pipeline.hgetall(metaKey);
+  }
+  const results = await pipeline.exec();
+
+  const items: Array<{ hash: string; size: number; lastAccessed: string }> = [];
+  if (results) {
+    for (const [err, metadata] of results) {
+      if (!err && metadata && typeof metadata === "object" && "hash" in metadata) {
+        const meta = metadata as Record<string, string>;
+        items.push({
+          hash: meta.hash,
+          size: parseInt(meta.size || "0", 10),
+          lastAccessed: meta.lastAccessed || meta.createdAt || new Date(0).toISOString(),
+        });
+      }
     }
   }
 
@@ -99,36 +123,42 @@ export async function evictCacheEntries(
 ): Promise<number> {
   const currentTotal = await getTotalCacheSize(redis);
   const targetSize = maxTotalSize - newItemSize;
-  
+
   if (currentTotal <= targetSize) {
     return 0; // No eviction needed
   }
 
   const itemsToEvict = currentTotal - targetSize;
   const allItems = await getAllCacheItemsSortedByAccess(redis);
-  
+
+  // Batch-check existence of candidate items via pipeline
+  const candidateHashes: string[] = [];
+  const existsPipeline = redis.pipeline();
+  for (const item of allItems) {
+    existsPipeline.exists(getCacheKey(item.hash));
+    candidateHashes.push(item.hash);
+  }
+  const existsResults = await existsPipeline.exec();
+
   let freedSize = 0;
   const itemsToDelete: string[] = [];
 
-  for (const item of allItems) {
-    if (freedSize >= itemsToEvict) {
-      break;
-    }
-    // Verify the cache item still exists (might have expired via TTL)
-    const cacheKey = getCacheKey(item.hash);
-    const exists = await redis.exists(cacheKey);
-    if (exists) {
-      freedSize += item.size;
-      itemsToDelete.push(item.hash);
+  for (let i = 0; i < allItems.length; i++) {
+    if (freedSize >= itemsToEvict) break;
+    const [err, exists] = existsResults![i];
+    if (!err && exists) {
+      freedSize += allItems[i].size;
+      itemsToDelete.push(allItems[i].hash);
     }
   }
 
-  // Delete the selected items
-  for (const hash of itemsToDelete) {
-    const cacheKey = getCacheKey(hash);
-    const metadataKey = getMetadataKey(hash);
-    await redis.del(cacheKey);
-    await redis.del(metadataKey);
+  // Batch-delete all selected items in a single pipeline
+  if (itemsToDelete.length > 0) {
+    const delPipeline = redis.pipeline();
+    for (const hash of itemsToDelete) {
+      delPipeline.del(getCacheKey(hash), getMetadataKey(hash));
+    }
+    await delPipeline.exec();
   }
 
   // Update total size
@@ -138,3 +168,5 @@ export async function evictCacheEntries(
 
   return freedSize;
 }
+
+export { scanKeys };
